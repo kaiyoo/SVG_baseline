@@ -31,6 +31,8 @@ def main():
     parser.add_argument("--save_original", action="store_true", help="save original audio-video pairs if true.")
     parser.add_argument("--save_jpeg", action="store_true", help="save jpegs of generated videos if true.")
     args = parser.parse_args()
+    # print(f'args.batch_size: {args.batch_size} || {type(args.batch_size,)}')
+    # print(f'torch.cuda.is_available(): {torch.cuda.is_available()} ')    
 
     generator = torch.Generator().manual_seed(args.seed)
     duration_per_sample = args.length
@@ -122,15 +124,24 @@ def main():
                 # save gen results
                 for b in range(bs):
                     video_to_save = (output.videos[b] * 255.0).astype(np.uint8)
-                    print(video_to_save.shape)
-                    audio_to_save = output.audios[b]
+                    # print(video_to_save.shape)
+                    audio_to_save = output.audios[b] # shape: (64000, )
+                    audio_to_save_ = audio_to_save.reshape(1, -1)  # Shape becomes (1, 64000)
+                    # audio_to_save_ = torch.tensor(audio_to_save, dtype=torch.float32)
+                    # audio_array=audio_to_save.reshape((1, -1)) # org
+                    # video_to_save = torch.tensor(video_to_save, dtype=torch.uint8)
+                    # fps = int(fps)
+                    # sampling_rate = int(sampling_rate)
+                    
                     prompt_str = prompt[b].replace(" ", "-")
                     if len(prompt_str) > 80:
                         prompt_str = prompt_str[:80]
+
+                    prompt_str = prompt_str.replace(".", "_")
                     mp4_file_name = os.path.join(out_dir_gen_mp4, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}.mp4")
                     wav_file_name = os.path.join(out_dir_gen_wav, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}.wav")
                     scipy.io.wavfile.write(wav_file_name, rate=sampling_rate, data=audio_to_save)
-                    torchvision.io.write_video(mp4_file_name, video_to_save, fps=fps, video_codec="libx264", audio_array=audio_to_save.reshape((1, -1)), audio_fps=sampling_rate, audio_codec="aac")
+                    torchvision.io.write_video(mp4_file_name, video_to_save, fps=fps, video_codec="libx264", audio_array=audio_to_save_, audio_fps=sampling_rate, audio_codec="aac")
                     if args.save_jpeg:
                         dir_jpg = os.path.join(out_dir_gen_jpg, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}")
                         os.makedirs(dir_jpg, exist_ok=True)

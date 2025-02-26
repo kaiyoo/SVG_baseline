@@ -15,7 +15,10 @@ class TorchDatasetWithDecord(torch.utils.data.Dataset):
         self.sampling_rate = sampling_rate
 
         # metadata is a list of file paths that each line includes "{id}.mp4, 'test label'" in the first two columns.
-        self.basedir = os.path.dirname(csv_path)
+        
+        # base_dir = "/home/user/Project/SVG_baseline/src/va_core/dataset/greatesthits"
+        # self.basedir = os.path.dirname(csv_path)
+        self.basedir = ''
         self.metadata = pd.read_csv(csv_path, header=None)
 
         if max_samples is not None and len(self.metadata) > max_samples:
@@ -26,10 +29,20 @@ class TorchDatasetWithDecord(torch.utils.data.Dataset):
         return len(self.metadata)
     
     def __getitem__(self, idx):
-        mp4_relpath = self.metadata.iloc[idx][0]
+        mp4_relpath = self.metadata.iloc[idx][0] 
+
+        # 
+        # mp4_relpath: ./src/va_core/dataset/greatesthits/vis-data-256-segment-8fps-crop/2015-03-28-19-45-24_denoised_thumb-004.mp4
+        # mp4_folder_name = "vis-data-256-segment-8fps-crop"
+
+        mp4_relpath = mp4_relpath
        
         if not mp4_relpath.endswith(".mp4"):
             mp4_relpath += ".mp4"
+
+        # print(f'self.basedir: {self.basedir}')
+        # print(f'self.metadata.iloc[idx]: {self.metadata.iloc[idx]}')
+        # print(f'mp4_relpath: {mp4_relpath}')
 
         full_path = os.path.join(self.basedir, mp4_relpath)
 

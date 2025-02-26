@@ -1,0 +1,32 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Debug SVG Script",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/svg/test_svg_with_dataset.py",
+        "args": [
+          "--model_path", "./trained_model/pipe",
+          "--dataset_name", "greatesthits",
+          "--n_steps", "10",
+          "--fps", "2",
+          "--save_original",
+          "--save_jpeg",
+          "--out_dir", "./out/gen_svg",
+          "--batch_size", "1"
+        ],
+        "console": "integratedTerminal",
+        // "env": {
+        //   "MODEL_DIR": "./trained_model/pipe",
+        //   "OUT_DIR": "./out/gen_svg",
+        //   "BATCH_SIZE": "2",
+        //   "N_STEPS": "25",
+        //   "FPS": "2"
+        // },
+        // "envFile": "${workspaceFolder}/.env",
+        "justMyCode": true
+      }
+    ]
+  }
+  

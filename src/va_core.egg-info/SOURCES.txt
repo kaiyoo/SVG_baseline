@@ -1,0 +1,15 @@
+README.md
+setup.py
+src/va_core/__init__.py
+src/va_core.egg-info/PKG-INFO
+src/va_core.egg-info/SOURCES.txt
+src/va_core.egg-info/dependency_links.txt
+src/va_core.egg-info/top_level.txt
+src/va_core/dataset/__init__.py
+src/va_core/dataset/torch_wrapper.py
+src/va_core/dataset/greatesthits/__init__.py
+src/va_core/dataset/greatesthits/generate_captions.py
+src/va_core/dataset/greatesthits/utils.py
+src/va_core/dataset/landscape/__init__.py
+src/va_core/dataset/landscape/utils.py
+src/va_core/model/__init__.py

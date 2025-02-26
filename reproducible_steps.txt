@@ -1,0 +1,102 @@
+# ubuntu 환경
+Considering Sony SVG_baseline repo's requirements.txt, it seems the installation environment is based on python 3.10.
+
+base guideline:
+https://github.com/kaiyoo/SVG_baseline/tree/main
+
+
+1. [Setup]
+1) install python 3.10
+sudo apt install curl -y
+curl https://pyenv.run | bash
+exec $SHELL
+pyenv install 3.10.13
+pyenv global 3.10.13
+
+(When encountering error):
+sudo apt install -y \
+  libbz2-dev \
+  liblzma-dev \
+  tk-dev \
+  build-essential \
+  zlib1g-dev \
+  libssl-dev \
+  libncurses5-dev \
+  libgdbm-dev \
+  libnss3-dev \
+  libreadline-dev \
+  libffi-dev \
+  libsqlite3-dev \
+  wget \
+  curl
+
+
+2) Check python version (3.10) and create venv
+python -V
+python -m venv venv
+source venv/bin/activate
+pip install --upgrade pip setuptools
+
+
+
+3) Update requirements.txt
+from original requirements.txt
+Remove setuptools==60.2.0 # duplicate setuptools
+Use diffusers==0.27.2 # can't find diffusers==0.27.0.dev0
+
+4) install libraries: (takes ~10 mins)
+pip install -r requirements.txt
+pip install -e .
+
+
+
+2. [Train model]
+./sh_scripts/script_train_greatesthits.sh
+
+
+[Sounding video generation with the trained model]
+./sh_scripts/script_gen_greatesthits.sh
+
+ISSUE:
+1) 경로 문제
+/home/user/Project/SVG_baseline/src/va_core/dataset/torch_wrapper.py
+solution: don't set base_dir
+TorchDatasetWithDecord => 
+self.basedir = ''
+
+
+2) torchvision.io.write_video
+TypeError: an integer is required #
+solution:downgrade av
+
+# pip show av
+Name: av
+Version: 14.2.0
+=>
+pip install av==13.1.0
+
+
+3. cuda memory
+def decode_latents_v(self, latents):
+        latents = 1 / self.vae_v.config.scaling_factor * latents
+
+        batch_size, channels, num_frames, height, width = latents.shape
+        latents = latents.permute(0, 2, 1, 3, 4).reshape(batch_size * num_frames, channels, height, width)
+
+===>    image = self.vae_v.decode(latents).sample
+
+
+[Evaluate the generated sounding videos]
+Setup
+To compute LanguageBind scores, you need to clone its official repo as shown below:
+
+cd third_party
+git clone https://github.com/PKU-YuanGroup/LanguageBind
+To compute FAD, you need to clone audioldm_eval as shown below:
+
+cd third_party
+git clone https://github.com/haoheliu/audioldm_eval
+Evaluation
+./sh_scripts/script_eval.sh
+
+
