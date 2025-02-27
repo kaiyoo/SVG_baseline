@@ -1,4 +1,12 @@
 evaluation
 244개
 
+"--n_steps", "10",          
+"--fps", "2",
+"--batch_size", "1"
 AV-Align:  0.27878668121496003
+
+"--n_steps", "50",          
+"--fps", "8",
+"--batch_size", "4"
+AV-Align:  0.36182222899481437

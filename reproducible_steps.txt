@@ -30,13 +30,11 @@ sudo apt install -y \
   wget \
   curl
 
-
 2) Check python version (3.10) and create venv
 python -V
 python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip setuptools
-
 
 
 3) Update requirements.txt
@@ -48,7 +46,9 @@ Use diffusers==0.27.2 # can't find diffusers==0.27.0.dev0
 pip install -r requirements.txt
 pip install -e .
 
-
+TODO: requirements.txt 아래대로 바꿀것
+pip install "diffusers==0.25.0" "huggingface_hub==0.20.0"
+pip install av==13.1.0
 
 2. [Train model]
 ./sh_scripts/script_train_greatesthits.sh
@@ -67,7 +67,7 @@ self.basedir = ''
 
 2) torchvision.io.write_video
 TypeError: an integer is required #
-solution:downgrade av
+solution: downgrade av
 
 # pip show av
 Name: av
