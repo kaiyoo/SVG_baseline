@@ -126,7 +126,6 @@ def main():
                     video_to_save = (output.videos[b] * 255.0).astype(np.uint8)
                     audio_to_save = output.audios[b] # shape: (64000, )
                     audio_to_save_ = audio_to_save.reshape(1, -1)  # Shape becomes (1, 64000)
-
                     prompt_str = prompt[b].replace(" ", "-")
                     if len(prompt_str) > 80:
                         prompt_str = prompt_str[:80]
