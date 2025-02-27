@@ -124,14 +124,8 @@ def main():
                 # save gen results
                 for b in range(bs):
                     video_to_save = (output.videos[b] * 255.0).astype(np.uint8)
-                    # print(video_to_save.shape)
                     audio_to_save = output.audios[b] # shape: (64000, )
                     audio_to_save_ = audio_to_save.reshape(1, -1)  # Shape becomes (1, 64000)
-                    # audio_to_save_ = torch.tensor(audio_to_save, dtype=torch.float32)
-                    # audio_array=audio_to_save.reshape((1, -1)) # org
-                    # video_to_save = torch.tensor(video_to_save, dtype=torch.uint8)
-                    # fps = int(fps)
-                    # sampling_rate = int(sampling_rate)
                     
                     prompt_str = prompt[b].replace(" ", "-")
                     if len(prompt_str) > 80:
@@ -156,7 +150,7 @@ def main():
                 # save orig
                 if args.save_original:
                     video_to_save = (video_orig.numpy().transpose((0, 1, 3, 4, 2)) * 255.0).astype(np.uint8)
-                    print(video_to_save.shape)
+                    # print(video_to_save.shape)
                     audio_to_save = audio_orig.numpy()
                     for b in range(bs):
                         prompt_str = prompt[b].replace(" ", "-")
