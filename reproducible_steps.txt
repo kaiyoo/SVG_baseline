@@ -92,9 +92,10 @@ Setup third_party installation
 
 cd third_party and git clone following repos
 
-
 1. To compute FAD, 
 git clone https://github.com/haoheliu/audioldm_eval
+# cd audioldm_eval
+# pip install -e .
 
 2. To compute FVD
 git clone https://github.com/universome/stylegan-v
