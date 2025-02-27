@@ -1,0 +1,14 @@
+matplotlib #/py_scripts/evaluation/av_align.py", line 12,
+
+## for py_scripts/evaluation/compute_fad.py", line 7, in <module>
+# git clone https://github.com/haoheliu/audioldm_eval
+# cd audioldm_eval
+# pip install -e .
+
+## for py_scripts/evaluation/compute_fvd.py
+# git clone https://github.com/universome/stylegan-v
+
+## for py_scripts/evaluation/compute_languagebind_score.py
+# git clone https://github.com/PKU-YuanGroup/LanguageBind
+
+

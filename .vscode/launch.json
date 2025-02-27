@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Debug SVG Script",
+        "name": "Debug Test Gen Script",
         "type": "python",
         "request": "launch",
         "program": "${workspaceFolder}/py_scripts/svg/test_svg_with_dataset.py",
@@ -10,7 +10,7 @@
           "--model_path", "./trained_model/pipe",
           "--dataset_name", "greatesthits",
           "--n_steps", "10",
-          "--fps", "2",
+          "--fps", "8",
           "--save_original",
           "--save_jpeg",
           "--out_dir", "./out/gen_svg",
@@ -26,6 +26,18 @@
         // },
         // "envFile": "${workspaceFolder}/.env",
         "justMyCode": true
+      },
+      {
+        "name": "Debug av_align.py",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/evaluation/av_align.py",
+        "args": [
+            "--audio_dir", "${workspaceFolder}/out/gen_svg/gen_wav",
+            "--video_dir", "${workspaceFolder}/out/gen_svg/gen_mp4"
+        ],
+        "console": "integratedTerminal",
+        "justMyCode": false
       }
     ]
   }

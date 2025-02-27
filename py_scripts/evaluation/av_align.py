@@ -24,12 +24,14 @@ def extract_frames(video_path):
         frames (list): List of frames extracted from the video.
         frame_rate (float): Frame rate of the video.
     """
+
     frames = []
     cap = cv2.VideoCapture(video_path)
     frame_rate = cap.get(cv2.CAP_PROP_FPS)
 
     if not cap.isOpened():
-        raise ValueError("Error: Unable to open the video file.")
+        return None, None
+        # raise ValueError("Error: Unable to open the video file.")
 
     while True:
         ret, frame = cap.read()
@@ -172,10 +174,15 @@ if __name__ == "__main__":
         video_path = os.path.join(args.video_dir, f'{file}.mp4')
         audio_path = os.path.join(args.audio_dir, f'{file}.wav')
 
+        # print(f'video_path: {video_path}')
+
         if not os.path.isfile(video_path):
             continue
 
         frames, fps = extract_frames(video_path)
+
+        if not frames or not fps:
+            continue
 
         audio_peaks = detect_audio_peaks(audio_path)
         flow_trajectory, video_peaks = detect_video_peaks(frames, fps)

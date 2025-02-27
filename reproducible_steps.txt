@@ -87,15 +87,24 @@ def decode_latents_v(self, latents):
 
 
 [Evaluate the generated sounding videos]
-Setup
-To compute LanguageBind scores, you need to clone its official repo as shown below:
 
-cd third_party
-git clone https://github.com/PKU-YuanGroup/LanguageBind
-To compute FAD, you need to clone audioldm_eval as shown below:
+Setup third_party installation
 
-cd third_party
+cd third_party and git clone following repos
+
+
+1. To compute FAD, 
 git clone https://github.com/haoheliu/audioldm_eval
+
+2. To compute FVD
+git clone https://github.com/universome/stylegan-v
+
+3. To compute LanguageBind score
+git clone https://github.com/PKU-YuanGroup/LanguageBind
+
+4. To compute ImageBind score 
+git clone https://github.com/facebookresearch/ImageBind
+
 Evaluation
 ./sh_scripts/script_eval.sh
 
