@@ -136,8 +136,8 @@ def main():
                     prompt_str = prompt[b].replace(" ", "-")
                     if len(prompt_str) > 80:
                         prompt_str = prompt_str[:80]
-
                     prompt_str = prompt_str.replace(".", "_")
+
                     mp4_file_name = os.path.join(out_dir_gen_mp4, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}.mp4")
                     wav_file_name = os.path.join(out_dir_gen_wav, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}.wav")
                     scipy.io.wavfile.write(wav_file_name, rate=sampling_rate, data=audio_to_save)
@@ -162,6 +162,8 @@ def main():
                         prompt_str = prompt[b].replace(" ", "-")
                         if len(prompt_str) > 80:
                             prompt_str = prompt_str[:80]
+                        prompt_str = prompt_str.replace(".", "_")
+                        
                         scipy.io.wavfile.write(os.path.join(out_dir_orig_wav, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}.wav"), rate=sampling_rate, data=audio_to_save[b])
                         torchvision.io.write_video(os.path.join(out_dir_orig_mp4, f"{str(i)}_{str(b)}_{str(n)}_{prompt_str}.mp4"), video_to_save[b], fps=fps, video_codec="libx264", audio_array=audio_to_save[b].reshape((1, -1)), audio_fps=sampling_rate, audio_codec="aac")
                         if args.save_jpeg:

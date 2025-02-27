@@ -77,9 +77,12 @@ def main():
                     # save gen results
                     video_to_save = (output.videos[0] * 255.0).astype(np.uint8)
                     audio_to_save = output.audios[0]
+                    
                     prompt_str = prompt.replace(" ", "-")
                     if len(prompt_str) > 80:
                         prompt_str = prompt_str[:80]
+                    prompt_str = prompt_str.replace(".", "_")
+
                     wav_file_name = os.path.join(out_dir_gen_wav, f"{str(idx)}_{str(n)}_{prompt_str}.wav")
                     mp4_file_name = os.path.join(out_dir_gen_mp4, f"{str(idx)}_{str(n)}_{prompt_str}.mp4")
                     scipy.io.wavfile.write(wav_file_name, rate=sampling_rate, data=audio_to_save)
