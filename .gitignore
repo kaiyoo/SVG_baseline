@@ -1,4 +1,5 @@
 .vscode/
+.venv/
 venv/
 trained_model.zip
 **/__pycache__/
