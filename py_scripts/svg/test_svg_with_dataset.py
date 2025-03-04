@@ -11,7 +11,12 @@ from torchvision import transforms
 
 from va_core.model.svg.pipeline_svg import VideoAudioGenWithSVGPipeline
 from va_core.dataset import get_dataset_info
-
+from tqdm import tqdm
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+# warnings.filterwarnings("ignore", message=".*functional_tensor.*")
+warnings.filterwarnings("ignore", module="torchvision")
+warnings.simplefilter("ignore", category=DeprecationWarning)  
 
 def main():
     parser = argparse.ArgumentParser(description="Simple example of a training script.")
@@ -79,6 +84,8 @@ def main():
         pipe.scheduler_a.config.gamma = 1. / np.sqrt(args.gamma)
 
     pipe = pipe.to("cuda", torch.float16)
+    # CPU 오프로딩 활성화 (필요할 때만 GPU로 로드)
+    pipe.enable_sequential_cpu_offload(gpu_id=0)
 
     # Prepare initial latents
     # audio
@@ -111,7 +118,8 @@ def main():
 
     with open(flist_name, 'w') as flist:
         for n in range(args.n_try):
-            for i, batch in enumerate(test_dataloader):
+            # for i, batch in enumerate(test_dataloader):
+            for i, batch in enumerate(tqdm(test_dataloader, total=len(test_dataloader), desc=f"Processing..")):
                 prompt = batch["text"]
                 bs = batch["audio"].shape[0]
                 audio_orig = tf_audio(batch["audio"].to(device="cpu"))
@@ -121,7 +129,7 @@ def main():
                 latents_v_init = torch.randn(shape_v, generator=generator, dtype=torch.float16)
                 output = pipe(prompt, prompt, negative_prompt_v=[neg_prompt]*bs, negative_prompt_a=[neg_prompt]*bs, length_in_s=duration_per_sample, frame_rate=fps, num_inference_steps=args.n_steps, guidance_scale_a=args.cfg_a, guidance_scale_v=args.cfg_v, height_v=resolution, width_v=resolution, latents_a=latents_a_init, latents_v=latents_v_init)
 
-                # save gen results
+                # # save gen results
                 for b in range(bs):
                     video_to_save = (output.videos[b] * 255.0).astype(np.uint8)
                     audio_to_save = output.audios[b] # shape: (64000, )
