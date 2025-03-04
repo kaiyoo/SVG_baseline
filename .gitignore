@@ -1,11 +1,13 @@
-.vscode/
+.env
 .venv/
+.checkpoints
+cache_dir/
 venv/
 trained_model.zip
 **/__pycache__/
 __pycache__/
 out/
+train_output
 trained_model/
 third_party/
 src/va_core/dataset/greatesthits/vis-data-256-segment-8fps-crop/
-.vscode/launch.json
