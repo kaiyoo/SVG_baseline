@@ -78,7 +78,6 @@ class VideoAudioGenWithSVGPipeline(DiffusionPipeline):
             unet_v=unet_v,
             unet_svg=unet_svg,
         )
-
         # self.unet_svg.set_unets(self.unet_a, self.unet_v)
         self.vae_a_scale_factor = 2 ** (len(self.vae_a.config.block_out_channels) - 1)
         self.vae_v_scale_factor = 2 ** (len(self.vae_v.config.block_out_channels) - 1)
@@ -97,7 +96,16 @@ class VideoAudioGenWithSVGPipeline(DiffusionPipeline):
 
         device = torch.device(f"cuda:{gpu_id}")
 
-        for cpu_offloaded_model in [self.unet_svg, self.unet_a, self.unet_v, self.text_encoder_a, self.text_encoder_v, self.vae_a, self.vae_v, self.vocoder]:
+        # for cpu_offloaded_model in [self.unet_svg, self.unet_a, self.unet_v, self.text_encoder_a, self.text_encoder_v, self.vae_a, self.vae_v, self.vocoder]:
+        #     cpu_offload(cpu_offloaded_model, device)
+
+        for cpu_offloaded_model in [
+            self.unet_svg, self.unet_a, self.unet_v, 
+            self.text_encoder_a, self.text_encoder_v, 
+            self.vae_a, self.vae_v, self.vocoder
+        ]:
+            if hasattr(cpu_offloaded_model, "config"):
+                _ = cpu_offloaded_model.config  # config 속성을 명시적으로 접근
             cpu_offload(cpu_offloaded_model, device)
 
     def _encode_prompt_a(
@@ -308,7 +316,11 @@ class VideoAudioGenWithSVGPipeline(DiffusionPipeline):
         batch_size, channels, num_frames, height, width = latents.shape
         latents = latents.permute(0, 2, 1, 3, 4).reshape(batch_size * num_frames, channels, height, width)
 
-        image = self.vae_v.decode(latents).sample
+        latents = latents.to(dtype=torch.float16) # to avoid cuda memory error
+
+        with torch.cuda.amp.autocast():
+            image = self.vae_v.decode(latents).sample 
+        
         video = (
             image[None, :]
             .reshape(
