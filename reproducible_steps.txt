@@ -1,11 +1,10 @@
 # ubuntu 환경
-Considering Sony SVG_baseline repo's requirements.txt, it seems the installation environment is based on python 3.10.
-
+- Considering Sony SVG_baseline repo's requirements.txt, it seems the installation environment is based on python 3.10.
 base guideline:
 https://github.com/kaiyoo/SVG_baseline/tree/main
 
 
-1. [Setup]
+==================== 1. [Setup] (Skip if you have python 3.10) ====================
 1) install python 3.10
 sudo apt install curl -y
 curl https://pyenv.run | bash
@@ -36,77 +35,112 @@ python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip setuptools
 
-
 3) Update requirements.txt
-from original requirements.txt
+requirements.txt 아래대로 바꿀것
+--------------------------------
 Remove setuptools==60.2.0 # duplicate setuptools
-Use diffusers==0.27.2 # can't find diffusers==0.27.0.dev0
+diffusers==0.25.0 (issue: to be compatible with huggingface_hub)
+huggingface_hub==0.20.0 (issue: huggingface cached_download & HF_HOME not available in newer version)
+av==13.1.0 (issue: requires integer in torchvision)
+---------------------------------
 
 4) install libraries: (takes ~10 mins)
 pip install -r requirements.txt
 pip install -e .
 
-TODO: requirements.txt 아래대로 바꿀것
-pip install "diffusers==0.25.0" "huggingface_hub==0.20.0"
-pip install av==13.1.0
 
-2. [Train model]
-./sh_scripts/script_train_greatesthits.sh
-
-
-[Sounding video generation with the trained model]
+================== 2. [Generate A&V with the trained model] ================== 
 ./sh_scripts/script_gen_greatesthits.sh
 
-ISSUE:
+
+================== 3. [Evaluate the generated sounding videos]==================
+1. Setup third_party installation
+cd third_party, git clone following repos, install
+and run "./sh_scripts/script_eval.sh" to calculate evaluation scores
+
+1) To compute FAD, 
+git clone https://github.com/haoheliu/audioldm_eval
+cd audioldm_eval
+(venv)  pip install -e .
+
+[numpy 에러시: numpy 1.x 설치 후 의존패키지 재설치]
+(venv) pip install numpy==1.23.5
+(venv) pip install --force-reinstall pandas scikit-learn "scikit-image<0.25"
+
+2) To compute FVD
+git clone https://github.com/universome/stylegan-v
+cd stylegan-v
+(venv) pip install -r stylegan_requirements.txt
+
+3) To compute LanguageBind score
+git clone https://github.com/PKU-YuanGroup/LanguageBind
+cd LanguageBind
+(venv) pip install -r requirements.txt
+
+[if protobuf version issues]:
+(venv) pip install protobuf==3.20.3 tensorboardX==2.5.1
+
+4) To compute ImageBind score 
+git clone https://github.com/facebookresearch/ImageBind
+cd ImageBind
+(venv) pip install .
+
+[if version issue:]
+(venv) pip install torch==2.0.1 torchaudio==2.0.2 imagebind torchvision==0.15.2
+
+[TypeError: EncodedVideo.from_path() got an unexpected keyword argument 'sample_rate']:
+/third_party/ImageBind/imagebind/data.py의 load_and_transform_video_data 함수
+L321 주석처리:  # **{"sample_rate": sample_rate},
+
+5) To compute CAVP score:
+Download checkpoints and put it to your_path (.checkpoints/cavp_epoch66.ckpt):
+https://huggingface.co/SimianLuo/Diff-Foley/blob/main/diff_foley_ckpt/cavp_epoch66.ckpt
+(venv) pip install mmcv (or mmcv-lite if you can't install mmcv)
+
+6) To compute AV-Align score:
+python ./py_scripts/evaluation/av_align.py --audio_dir ${TARGET_PATH}/gen_wav --video_dir ${TARGET_PATH}/gen_mp4 > ${TARGET_PATH}/av_align.txt
+
+
+2. Evaluate
+./sh_scripts/script_eval.sh
+
+
+==================== 2. [Train model] ====================
+./sh_scripts/script_train_greatesthits.sh
+
+설치:
+pip install bitsandbytes
+
+
+
+==================== [ISSUE] ====================
 1) 경로 문제
 /home/user/Project/SVG_baseline/src/va_core/dataset/torch_wrapper.py
 solution: don't set base_dir
 TorchDatasetWithDecord => 
 self.basedir = ''
 
-
 2) torchvision.io.write_video
 TypeError: an integer is required #
 solution: downgrade av
 
-# pip show av
-Name: av
-Version: 14.2.0
-=>
-pip install av==13.1.0
-
-
-3. cuda memory
+3) cuda memory in generation
 def decode_latents_v(self, latents):
         latents = 1 / self.vae_v.config.scaling_factor * latents
-
         batch_size, channels, num_frames, height, width = latents.shape
         latents = latents.permute(0, 2, 1, 3, 4).reshape(batch_size * num_frames, channels, height, width)
-
 ===>    image = self.vae_v.decode(latents).sample
 
+============================================================
 
-[Evaluate the generated sounding videos]
+[Modified code]
+1) py_scripts/svg/test_svg_with_dataset.py
+- def enable_sequential_cpu_offload() 함수 수정: warning 방지
+- CPU 오프로딩 활성화 (필요할 때만 GPU로 로드)
+pipe = pipe.to("cuda", torch.float16)
+pipe.enable_sequential_cpu_offload(gpu_id=0)
 
-Setup third_party installation
-
-cd third_party and git clone following repos
-
-1. To compute FAD, 
-git clone https://github.com/haoheliu/audioldm_eval
-# cd audioldm_eval
-# pip install -e .
-
-2. To compute FVD
-git clone https://github.com/universome/stylegan-v
-
-3. To compute LanguageBind score
-git clone https://github.com/PKU-YuanGroup/LanguageBind
-
-4. To compute ImageBind score 
-git clone https://github.com/facebookresearch/ImageBind
-
-Evaluation
-./sh_scripts/script_eval.sh
-
-
+2) SVG_baseline/src/va_core/model/svg/modules_video.py
+ContinuousPositionBias(nn.Module): 
+def device(self):
+class forward(): meta 텐서 cuda로 변환

@@ -2,43 +2,135 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Debug Test Gen Script",
+        "name": "Train",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/svg/train_svg.py",
+        // "env": {
+        //   "N_GPUS": "1",  // 원하는 GPU 개수로 설정
+        //   "OUT_DIR": "train_output"  // 출력 경로를 환경 변수로 지정
+        // },
+        "args": [
+            // "--use_deepspeed",
+            // "--gpu_ids", "all",
+            // "--num_processes", "${env:N_GPUS}",
+            // "./py_scripts/svg/train_svg.py",
+            "--dataset_name", "greatesthits",
+            "--train_batch_size", "1",
+            "--gradient_accumulation_steps", "2",
+            "--duration_per_sample", "4",
+            "--num_frames_per_sample", "16",
+            "--num_train_epochs", "1",
+            "--output_dir", "train_output",
+            "--use_ema",
+            "--mixed_precision", "fp16",
+            "--validation_epochs", "1",
+            "--resume_from_checkpoint", "latest"
+        ],
+        "console": "integratedTerminal",
+        "subProcess": true,
+        "cwd": "${workspaceFolder}",
+        // "python": "${workspaceFolder}/venv/bin/python"  // 가상 환경 경로에 맞게 수정
+      },
+      {
+        "name": "Generate A/V",
         "type": "python",
         "request": "launch",
         "program": "${workspaceFolder}/py_scripts/svg/test_svg_with_dataset.py",
         "args": [
           "--model_path", "./trained_model/pipe",
           "--dataset_name", "greatesthits",
-          "--n_steps", "10",
-          "--fps", "8",
+          "--n_steps", "2",
+          "--fps", "4",
+          "--batch_size", "2",
+          "--max_samples", "10",
           "--save_original",
           "--save_jpeg",
-          "--out_dir", "./out/gen_svg",
-          "--batch_size", "1"
+          "--out_dir", "./out/gen_svg"     
         ],
         "console": "integratedTerminal",
-        // "env": {
-        //   "MODEL_DIR": "./trained_model/pipe",
-        //   "OUT_DIR": "./out/gen_svg",
-        //   "BATCH_SIZE": "2",
-        //   "N_STEPS": "25",
-        //   "FPS": "2"
-        // },
-        // "envFile": "${workspaceFolder}/.env",
         "justMyCode": true
       },
       {
-        "name": "Debug av_align.py",
+        "name": "CAL AV_align",
         "type": "python",
         "request": "launch",
-        "program": "${workspaceFolder}/py_scripts/evaluation/av_align.py",
+        "program": "${workspaceFolder}/py_scripts/evaluation/av_align.py", // compute_imagebind_score.py
         "args": [
             "--audio_dir", "${workspaceFolder}/out/gen_svg/gen_wav",
             "--video_dir", "${workspaceFolder}/out/gen_svg/gen_mp4"
         ],
         "console": "integratedTerminal",
         "justMyCode": false
-      }
+      },
+      {
+        "name": "Cal FAD",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/evaluation/compute_fad.py", 
+        // "envFile": "${workspaceFolder}/.env",  // somehow it doesn't work in args..
+        // "env": {
+        //     "TARGET_PATH": "${workspaceFolder}/out/gen_svg"  // 환경 변수를 여기에도 추가
+        // },
+        "args": [          
+            "--source_dir", "${workspaceFolder}/out/gen_svg/orig_wav",
+            "--gen_dir", "${workspaceFolder}/out/gen_svg/gen_wav"
+        ],
+        "output": "${workspaceFolder}/out/gen_svg/fad.txt",
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
+      {
+        "name": "Cal FVD",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/evaluation/compute_fvd.py", 
+        "args": [          
+            "--real_data_path", "${workspaceFolder}/out/gen_svg/orig_jpg",
+            "--fake_data_path", "${workspaceFolder}/out/gen_svg/gen_jpg",
+            "--resolution", "256",
+        ],
+        "output": "${workspaceFolder}/out/gen_svg/fvd.txt",
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
+      {
+        "name": "Cal languagebind_score",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/evaluation/compute_languagebind_score.py", 
+        "args": [          
+            "--csv_path", "${workspaceFolder}/out/gen_svg/gen_flist.txt",
+        ],
+        "output": "${workspaceFolder}/out/gen_svg/language_bind.txt",
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
+      {
+        "name": "Cal imagebind_score",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/evaluation/compute_imagebind_score.py", 
+        "args": [          
+            "--csv_path", "${workspaceFolder}/out/gen_svg/gen_flist.txt",
+        ],
+        "output": "${workspaceFolder}/out/gen_svg/image_bind.txt",
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
+      {
+        "name": "Cal CAVP_score",
+        "type": "python",
+        "request": "launch",
+        "program": "${workspaceFolder}/py_scripts/evaluation/cavp_score.py", 
+        "args": [          
+            "--path", "${workspaceFolder}/out/gen_svg/gen_mp4",
+            "--checkpoints", "${workspaceFolder}/.checkpoints/cavp_epoch66.ckpt",
+        ],
+        "output": "${workspaceFolder}/out/gen_svg/image_bind.txt",
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
     ]
   }
   
