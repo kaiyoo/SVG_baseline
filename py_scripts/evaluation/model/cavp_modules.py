@@ -8,17 +8,17 @@ import warnings
 
 import torch
 import torch.nn as nn
-from mmcv.cnn import ConvModule, kaiming_init
-from mmcv.runner import _load_checkpoint, load_checkpoint
-from mmcv.utils import print_log
+from mmcv.cnn import ConvModule #, kaiming_init
+# from mmcv.runner import _load_checkpoint, load_checkpoint
+# from mmcv.utils import print_log
 
 import warnings
 import torch.nn as nn
 import torch.utils.checkpoint as cp
-from mmcv.cnn import (ConvModule, NonLocal3d, build_activation_layer,
-                      constant_init, kaiming_init)
-from mmcv.runner import _load_checkpoint, load_checkpoint
-from mmcv.utils import _BatchNorm
+from mmcv.cnn import (ConvModule, NonLocal3d, build_activation_layer)
+                    #   constant_init, kaiming_init)
+# from mmcv.runner import _load_checkpoint, load_checkpoint
+# from mmcv.utils import _BatchNorm
 from torch.nn.modules.utils import _ntuple, _triple
 
 from itertools import repeat
@@ -28,6 +28,89 @@ from torch.utils.checkpoint import checkpoint
 
 from torch.nn import functional as F
 from collections import OrderedDict
+
+
+# kaiming initialization override because of torch/cuda incompatibility issues.
+import torch.nn.init as init
+
+def kaiming_init(layer):
+    if isinstance(layer, torch.nn.Conv2d):
+        init.kaiming_normal_(layer.weight, mode='fan_out', nonlinearity='relu')
+        if layer.bias is not None:
+            init.zeros_(layer.bias)
+
+
+def _load_checkpoint(model, checkpoint_path):
+    """
+    주어진 경로에서 체크포인트를 로드하고, 모델에 상태를 불러옵니다.
+    
+    Args:
+        model (torch.nn.Module): 로드할 모델
+        checkpoint_path (str): 체크포인트 파일 경로
+    
+    Returns:
+        model: 가중치가 로드된 모델
+    """
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['state_dict'], strict=False)  # strict=False로 일부 파라미터가 일치하지 않아도 로드
+    return model
+
+
+def load_checkpoint(model, checkpoint_path, strict=False, logger=None):
+    """
+    체크포인트를 로드하고 모델에 상태를 적용합니다. 로깅을 지원합니다.
+    
+    Args:
+        model (torch.nn.Module): 로드할 모델
+        checkpoint_path (str): 체크포인트 파일 경로
+        strict (bool): True면 모델과 체크포인트의 파라미터가 정확히 일치해야 함
+        logger (logging.Logger): 로깅 객체. None이면 로깅하지 않음
+    
+    Returns:
+        model: 체크포인트가 로드된 모델
+    """
+    if logger:
+        logger.info(f"Loading checkpoint from {checkpoint_path}...")
+
+    checkpoint = torch.load(checkpoint_path)
+    model.load_state_dict(checkpoint['state_dict'], strict=strict)
+    
+    if logger:
+        logger.info(f"Checkpoint loaded successfully from {checkpoint_path}")
+    
+    return model
+
+def constant_init(module, val, bias=False):
+    """
+    BatchNorm 또는 다른 모듈을 constant 값으로 초기화합니다.
+
+    Args:
+        module (nn.Module): 초기화할 모듈
+        val (float): 초기화할 값
+        bias (bool): 배치 정규화의 bias 초기화 여부
+    """
+    if isinstance(module, nn.BatchNorm2d) or isinstance(module, nn.BatchNorm3d):
+        # BatchNorm 레이어의 weight와 bias를 constant 값으로 초기화
+        init.constant_(module.weight, val)
+        if module.bias is not None and bias:
+            init.constant_(module.bias, 0)
+    elif isinstance(module, nn.Linear):
+        # Linear 레이어의 weight와 bias를 constant 값으로 초기화
+        init.constant_(module.weight, val)
+        if module.bias is not None:
+            init.constant_(module.bias, 0)
+
+import logging
+
+def get_root_logger():
+    # 가장 간단한 로거 생성 (경고 메시지를 포함한 모든 로그를 표시)
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARNING)  # 기본 로깅 수준을 WARNING으로 설정
+    handler = logging.StreamHandler()  # 표준 출력에 로그를 출력
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')  # 로그 메시지 포맷
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
 
 class BasicBlock3d(nn.Module):
     """BasicBlock 3d block for ResNet3D.
@@ -822,7 +905,8 @@ class ResNet3d(nn.Module):
             for m in self.modules():
                 if isinstance(m, nn.Conv3d):
                     kaiming_init(m)
-                elif isinstance(m, _BatchNorm):
+                elif isinstance(m, nn.BatchNorm3d):    
+                # elif isinstance(m, _BatchNorm):
                     constant_init(m, 1)
 
             if self.zero_init_residual:
@@ -869,10 +953,9 @@ class ResNet3d(nn.Module):
         self._freeze_stages()
         if mode and self.norm_eval:
             for m in self.modules():
-                if isinstance(m, _BatchNorm):
+                # if isinstance(m, _BatchNorm):
+                if isinstance(m, nn.BatchNorm3d):
                     m.eval()
-
-
 
 
 class ResNet3dPathway(ResNet3d):
