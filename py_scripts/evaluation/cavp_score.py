@@ -36,7 +36,8 @@ device = torch.device("cuda")
 
 fps = 4  #  CAVP default FPS=4, Don't change it.
 batch_size = 40  # Don't change it.
-cavp_config_path = "./config/Stage1_CAVP.yaml"  #  CAVP Config
+evaluation_dir = "py_scripts/evaluation"
+cavp_config_path = f"{evaluation_dir}/config/Stage1_CAVP.yaml"  #  CAVP Config
 cavp_ckpt_path = args.checkpoints  # "./diff_foley_ckpt/cavp_epoch66.ckpt"  #  CAVP Ckpt
 
 # Initalize CAVP Model:

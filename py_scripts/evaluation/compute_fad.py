@@ -9,7 +9,7 @@ from audioldm_eval import EvaluationHelper
 
 def main():
     parser = argparse.ArgumentParser(description="Compute evaluation metrics.")
-    parser.add_argument("--target_dir", type=str, default=None, help="path to target.")
+    parser.add_argument("--gen_dir", type=str, default=None, help="path to target.")
     parser.add_argument("--source_dir", type=str, default=None, help="path to generated results.")
     args = parser.parse_args()
 
@@ -19,8 +19,8 @@ def main():
 
     # Perform evaluation, result will be print out and saved as json
     metrics = evaluator.main(
-        args.source_dir,
-        args.target_dir,
+        args.gen_dir,
+        args.source_dir,        
     )
 
     print(f"FAD = {metrics}")

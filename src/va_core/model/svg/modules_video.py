@@ -146,7 +146,9 @@ class ContinuousPositionBias(nn.Module):
 
     @property
     def device(self):
-        return next(self.parameters()).device
+        # return next(self.parameters()).device
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     
     @property
     def dtype(self):
@@ -164,9 +166,13 @@ class ContinuousPositionBias(nn.Module):
             if self.log_dist:
                 rel_pos = torch.sign(rel_pos) * torch.log(rel_pos.abs() + 1)
 
-            self.register_buffer('rel_pos', rel_pos, persistent = False)
+            # self.register_buffer('rel_pos', rel_pos, persistent = False)
+            self.register_buffer('rel_pos', rel_pos.to(self.device), persistent=False)
 
-        rel_pos = self.rel_pos.to(self.dtype)
+        # rel_pos = self.rel_pos.to(self.dtype) # 2025/02/28 modified. convert meta tensor to cuda
+        if self.rel_pos.device.type == "meta":
+            self.rel_pos = torch.zeros_like(self.rel_pos, device=self.device)  # 실제 메모리에 할당
+        rel_pos = self.rel_pos.to(self.device, dtype=self.dtype)
 
         for layer in self.net:
             rel_pos = layer(rel_pos)
