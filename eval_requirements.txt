@@ -1,4 +1,7 @@
 matplotlib #/py_scripts/evaluation/av_align.py", line 12,
+torchaudio
+clip
+mmcv # used in cavp score. pip install mmcv-lite instead when cuda-torch issues
 
 ## for py_scripts/evaluation/compute_fad.py", line 7, in <module>
 # git clone https://github.com/haoheliu/audioldm_eval
