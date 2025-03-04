@@ -1,0 +1,13 @@
+hydra-core==1.0.7
+click==7.1.2
+scipy
+ninja==1.10.0
+tensorboard==2.4.1
+tqdm
+gitpython
+gpustat
+av
+matplotlib
+torch_tb_profiler==0.3.1
+joblib==1.2.0 # changed to 1.2.0 to be compatible with scikit-learn 1.6.1. original: joblit==1.1.0
+-e .
