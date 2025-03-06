@@ -571,6 +571,7 @@ class VideoAudioGenWithSVGPipeline(DiffusionPipeline):
         audio = self.mel_spectrogram_to_waveform(mel_spectrogram)
         audio = audio[:, :original_waveform_length]
         # video
+        torch.cuda.empty_cache()
         video = self.decode_latents_v(latents_v)
 
         if output_type == "np":

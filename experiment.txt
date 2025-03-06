@@ -10,3 +10,39 @@ AV-Align:  0.27878668121496003
 "--fps", "8",
 "--batch_size", "4"
 AV-Align:  0.36182222899481437
+
+[local cuda memory ok]
+gen: 19s*10
+"--n_steps", "25",
+"--fps", "4",
+"--batch_size", "1",
+"--max_samples", "10",
+AV-Align:  0.5266269841269842
+===============================================
+3/2
+"--n_steps", "5",
+"--fps", "2",
+"--batch_size", "4",
+"--max_samples", "100",
+=> total: 7m27s || 1batch: 12s (n_step:5)
+Result:
+AV-Align:  0.30049725274725264
+FAD = {'frechet_distance': 5.504247733385128, 'frechet_audio_distance': 3.9650585975086123, 'kullback_leibler_divergence_sigmoid': 0.22102752327919006, 'kullback_leibler_divergence_softmax': 0.003890891559422016, 'lsd': nan, 'psnr': nan, 'ssim': nan, 'inception_score_mean': 1.0100512758124143, 'inception_score_std': 0.0003918213473853913, 'kernel_inception_distance_mean': nan, 'kernel_inception_distance_std': nan}
+
+"--n_steps", "2","--fps", "4,"--batch_size", "2","--max_samples", "10",
+FVD:
+{"results": {"fvd2048_16f": 3523.0781639006577}, "metric": "fvd2048_16f", "total_time": 64.4523413181305, "total_time_str": "1m 04s", "num_gpus": 1, "snapshot_pkl": null, "timestamp": 1740928096.7588227}
+{"results": {"fid50k_full": 376.8814093871078}, "metric": "fid50k_full", "total_time": 149.27456545829773, "total_time_str": "2m 29s", "num_gpus": 1, "snapshot_pkl": null, "timestamp": 1740928246.034417}
+
+LanguageBind:
+TEXT-AUDIO SCORE: [0.21932681]
+TEXT-VIDEO SCORE: [-0.00327373]
+AUDIO-VIDEO SCORE: [0.15904552]
+
+ImageBind:
+TEXT-AUDIO SCORE: [0.0796154]
+TEXT-VIDEO SCORE: [0.15328081]
+AUDIO-VIDEO SCORE: [0.11619174]
+
+CAVP:
+the mean cosine similarity between video and audio is 0.8068642020225525

@@ -15,9 +15,21 @@ class TrainingModel(torch.nn.Module):
         self.unet_svg = unet_svg
         self.unet_a = unet_a
         self.unet_v = unet_v
+
+    def _forward_unet_svg(self, x, timesteps, context, class_labels, xtype, x_con, t_con, block_connection):
+        return self.unet_svg([self.unet_a, self.unet_v],
+                             x, timesteps, context, class_labels, xtype,
+                             x_con=x_con, t_con=t_con, block_connection=block_connection)
+
     
     def forward(self, x, timesteps, context, class_labels, xtype=["audio", "video"], x_con=[None, None], t_con=[None, None], block_connection=None):
-        noise_pred = self.unet_svg([self.unet_a, self.unet_v], x, timesteps, context, class_labels, xtype, x_con=x_con, t_con=t_con, block_connection=block_connection)
+        # noise_pred = self.unet_svg([self.unet_a, self.unet_v], x, timesteps, context, class_labels, xtype, x_con=x_con, t_con=t_con, block_connection=block_connection)
+            
+        # checkpoint를 적용하면, 중간 활성화가 저장되지 않고 backward 시 재계산됨.
+        noise_pred = torch.utils.checkpoint.checkpoint(self._forward_unet_svg,
+                                                       x, timesteps, context, class_labels,
+                                                       xtype, x_con, t_con, block_connection)
+        
         return noise_pred
     
 

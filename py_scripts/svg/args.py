@@ -123,7 +123,10 @@ def parse_args():
                         help=(
                             "Number of subprocesses to use for data loading. 0 means that the data will be loaded in the main process."
                         ),
-    )
+    ),
+    parser.add_argument("--short_memory", 
+                    action="store_true", 
+                    help="Whether gpu memory ram is not big.")
     parser.add_argument("--adam_beta1", 
                         type=float, 
                         default=0.9, 
@@ -196,7 +199,18 @@ def parse_args():
                             "Whether training should be resumed from a previous checkpoint. Use a path saved by"
                             ' `--checkpointing_steps`, or `"latest"` to automatically select the last available checkpoint.'
                         ),
-    )
+    ),
+    parser.add_argument("--have_best_model",
+                        action="store_true", 
+                        help="have best model"
+    ),
+    parser.add_argument("--best_model_dir",
+                        type=str,
+                        default=None,
+                        help=(
+                            "best model directory"
+                        ),
+    ),
     parser.add_argument("--validation_epochs",
                         type=int,
                         default=5,

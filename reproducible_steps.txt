@@ -106,10 +106,14 @@ python ./py_scripts/evaluation/av_align.py --audio_dir ${TARGET_PATH}/gen_wav --
 
 
 ==================== 2. [Train model] ====================
-./sh_scripts/script_train_greatesthits.sh
-
 설치:
 pip install bitsandbytes
+
+실행:
+./sh_scripts/script_train_greatesthits.sh
+
+[에러:ImportError: cannot import name 'driver' from 'triton.runtime' 에러시]:
+pip uninstall -y triton
 
 
 

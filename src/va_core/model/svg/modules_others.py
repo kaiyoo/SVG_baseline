@@ -293,7 +293,7 @@ class ResBlock(TimestepBlock):
         self.dropout = dropout
         self.out_channels = out_channels or channels
         self.use_conv = use_conv
-        self.use_checkpoint = use_checkpoint
+        self.use_checkpoint = True #use_checkpoint
         self.use_scale_shift_norm = use_scale_shift_norm
 
         self.in_layers = nn.Sequential(
@@ -350,7 +350,7 @@ class ResBlock(TimestepBlock):
         )
 
 
-    def _forward(self, x, emb):
+    def _forward(self, x, emb):        
         is_video = x.ndim == 5
         if is_video:
             num_frames = x.shape[2]
@@ -373,6 +373,7 @@ class ResBlock(TimestepBlock):
             h = out_norm(h) * (1 + scale) + shift
             h = out_rest(h)
         else:
+            th.cuda.empty_cache()
             h = h + emb_out
             h = self.out_layers(h)
             
